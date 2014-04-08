@@ -1,5 +1,6 @@
 package demo;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import org.biojava.bio.structure.align.util.AlignmentTools;
 public class AsymmetricDimer {
 
 	public static void main(String[] args) {
+		// Read structure from input. May be a PDB ID, filename, SCOP domain, etc.
 		// /Users/blivens/dev/capitani/tlpa_superpositions/tlpa_scoI_on_cox_by_tlpa.pdb
 		if( args.length != 1 || args[0].equalsIgnoreCase("-h")) {
 			System.out.println("usage: [-h] structureID");
@@ -42,31 +44,49 @@ public class AsymmetricDimer {
 			System.exit(1);
 			return;
 		}
-		
+
+
+		// Only accept dimer input
 		if(s.size() != 2) {
 			System.err.println("Error. Only runs on dimers.");
 		}
 		
-		Atom[] ca1 = StructureTools.getAtomCAArray(s.getChain(0));
-		Atom[] ca2 = StructureTools.getAtomCAArray(s.getChain(1));
 		
-		AFPChain chainAlign;
 		try {
 			StructureAlignment ce = StructureAlignmentFactory.getAlgorithm(CeMain.algorithmName);
-			chainAlign = ce.align(ca1, ca2);
+			Atom[] full1 = StructureTools.getAtomCAArray(s);
+			Atom[] full2 = StructureTools.cloneCAArray(full1);
+			AFPChain fullAlign = AsymmetricDimer.alignDimer(ce,full1,StructureTools.getAtomCAArray(s.getChain(0)).length);
+			// Display
+			StructureAlignmentDisplay.display(fullAlign, full1, full2);
 		} catch (StructureException e) {
 			e.printStackTrace();
 			System.exit(1);
 			return;
 		}
+	}
+
+	/**
+	 * 
+	 * @param aligner
+	 * @param ca Concatenated array of CA atoms for both chains. The first `chain1len`
+	 *  atoms should come from one chain, with the remainder coming from the second.
+	 * @param chain1len Number of atoms in `ca` from the first chain
+	 * @return
+	 * @throws StructureException
+	 */
+	public static AFPChain alignDimer(StructureAlignment aligner, Atom[] ca, int chain1len) throws StructureException{
+		Atom[] ca1 = Arrays.copyOf(ca, chain1len);
+		Atom[] ca2 = StructureTools.cloneCAArray(Arrays.copyOfRange(ca, chain1len, ca.length));
 		
-		Atom[] full1 = StructureTools.getAtomCAArray(s);
-		assert(full1.length == ca1.length+ca2.length);
-		
-		int chain1len = ca1.length;
-		
+		// Align chains individually
+		AFPChain chainAlign;
+		chainAlign = aligner.align(ca1, ca2);
+
+		// Create new alignment with the same aligned residues, but include the full structure
+
+		// Build map of aligned positions
 		Map<Integer,Integer> alignmentMap = new LinkedHashMap<Integer,Integer>();
-		
 		int[] blocklens = chainAlign.getOptLen();
 		int[][][] optAln = chainAlign.getOptAln();
 		for(int block=0;block<chainAlign.getBlockNum();block++) {
@@ -77,16 +97,10 @@ public class AsymmetricDimer {
 				alignmentMap.put(atom2, atom1);
 			}
 		}
-		try {
-			Atom[] full2 = StructureTools.cloneCAArray(full1);
-			AFPChain fullAlign = AlignmentTools.replaceOptAln(chainAlign, full1, full2, alignmentMap);
-			AlignmentTools.updateSuperposition(fullAlign, full1, full2);
-			StructureAlignmentDisplay.display(fullAlign, full1, full2);
-		} catch (StructureException e) {
-			e.printStackTrace();
-			System.exit(1);
-			return;
-		}
-	}
+		// Create an AFPChain for the full alignment
+		Atom[] full2 = StructureTools.cloneCAArray(ca);
+		AFPChain fullAlign = AlignmentTools.replaceOptAln(chainAlign, ca, full2, alignmentMap);
 
+		return fullAlign;
+	}
 }
