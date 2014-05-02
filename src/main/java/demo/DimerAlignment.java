@@ -32,7 +32,7 @@ import org.biojava.bio.structure.jama.Matrix;
  * @author Spencer Bliven
  *
  */
-public class AsymmetricDimer {
+public class DimerAlignment {
 	private AFPChain alignment;
 	private RotationAxis axis;
 	private Atom[] full1;
@@ -49,7 +49,7 @@ public class AsymmetricDimer {
 	 * @return
 	 * @throws StructureException
 	 */
-	public AsymmetricDimer(StructureAlignment aligner, Structure s) throws StructureException{
+	public DimerAlignment(StructureAlignment aligner, Structure s) throws StructureException{
 		if(s.size() != 2) {
 			throw new IllegalArgumentException("Expect two-chain input structure");
 		}
@@ -141,7 +141,7 @@ public class AsymmetricDimer {
 
 		try {
 			StructureAlignment ce = StructureAlignmentFactory.getAlgorithm(CeMain.algorithmName);
-			AsymmetricDimer dimer = new AsymmetricDimer(ce,s);
+			DimerAlignment dimer = new DimerAlignment(ce,s);
 			Atom[] full1 = dimer.getCA1();
 			Atom[] full2 = dimer.getCA2();
 			AFPChain fullAlign = dimer.getAlignment();
