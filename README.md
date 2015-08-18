@@ -1,22 +1,10 @@
 Symmetry-tools
 ==============
 
-This project packages CE-Symm and related tools for easy deployment.
+This repository previously contained the RCSB symmetry-tools source. It has
+been merged into the [RCSB Symmetry project](https://github.com/rcsb/symmetry).
 
-Tools can be run or downloaded from http://source.rcsb.org/jfatcatserver/symmetry.jsp.
+For a version compatible with the last code hosted here, see the symmetry-tools
+module of the [rcsb/symmetry legacy branch](https://github.com/rcsb/symmetry/tree/legacy).
 
-Documentation
--------------
-
-* [CE-Symm](docs/CeSymm.md)
-* CensusCLI
-
-License
-------------
-
-Symmetry-tools is released under the LGPL 2.1 and includes the following libraries:
-
-* [BioJava](http://biojava.org)
-* [RCSB Symmetry](http://github.com/rcsb/symmetry)
-* [jMol](http://jmol.sourceforge.net/)
 
